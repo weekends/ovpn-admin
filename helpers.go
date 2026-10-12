@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -63,6 +64,20 @@ func fRead(path string) string {
 	}
 
 	return string(content)
+}
+
+var pemBlockRegexp = regexp.MustCompile(`(?s)-----BEGIN [^-]+-----.*?-----END [^-]+-----`)
+
+// certificatePEM extracts just the PEM block (cert/key/CA/static-key) from raw
+// easy-rsa output, which on some versions includes extra non-PEM metadata text
+// before/after the actual block. Returns the input unchanged if no PEM block
+// is found, so callers never silently lose content.
+func certificatePEM(raw string) string {
+	match := pemBlockRegexp.FindString(raw)
+	if match == "" {
+		return raw
+	}
+	return match
 }
 
 func fCreate(path string) error {

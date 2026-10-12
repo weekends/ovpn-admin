@@ -186,6 +186,7 @@ new Vue({
     serverRole: "master",
     lastSync: "unknown",
     modulesEnabled: [],
+    theme: "light",
     u: {
       newUserName: '',
       newUserPassword: '',
@@ -205,7 +206,8 @@ new Vue({
       ccd: {
         Name: '',
         ClientAddress: '',
-        CustomRoutes: []
+        CustomRoutes: [],
+        FullTunnel: false
       },
       newRoute: {},
       ccdApplyStatus: "",
@@ -218,6 +220,14 @@ new Vue({
     this.getUserData();
     this.getServerSetting();
     this.filters.hideRevoked = this.$cookies.isKey('hideRevoked') ? (this.$cookies.get('hideRevoked') == "true") : false
+    try {
+      var savedTheme = localStorage.getItem('ovpn-admin-theme');
+      if (!savedTheme) {
+        savedTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+      }
+      this.theme = savedTheme;
+    } catch (e) {}
+    document.documentElement.setAttribute('data-theme', this.theme);
   },
   created() {
     var _this = this;
@@ -345,6 +355,13 @@ new Vue({
 
   },
   methods: {
+    toggleTheme: function() {
+      this.theme = this.theme == 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', this.theme);
+      try {
+        localStorage.setItem('ovpn-admin-theme', this.theme);
+      } catch (e) {}
+    },
     rowStyleClassFn: function(row) {
       if (row.ConnectionStatus == 'Connected') {
         return 'connected-user'

@@ -221,12 +221,18 @@ type openvpnClientConfig struct {
 }
 
 type OpenvpnClient struct {
-	Identity         string `json:"Identity"`
-	AccountStatus    string `json:"AccountStatus"`
-	ExpirationDate   string `json:"ExpirationDate"`
-	RevocationDate   string `json:"RevocationDate"`
-	ConnectionStatus string `json:"ConnectionStatus"`
-	Connections      int    `json:"Connections"`
+	Identity         string           `json:"Identity"`
+	AccountStatus    string           `json:"AccountStatus"`
+	ExpirationDate   string           `json:"ExpirationDate"`
+	RevocationDate   string           `json:"RevocationDate"`
+	ConnectionStatus string           `json:"ConnectionStatus"`
+	Connections      int              `json:"Connections"`
+	ConnectedAddrs   []connectedAddr  `json:"ConnectedAddrs"`
+}
+
+type connectedAddr struct {
+	VirtualAddress string `json:"VirtualAddress"`
+	RealAddress    string `json:"RealAddress"`
 }
 
 type ccdRoute struct {
@@ -239,6 +245,7 @@ type Ccd struct {
 	User          string     `json:"User"`
 	ClientAddress string     `json:"ClientAddress"`
 	CustomRoutes  []ccdRoute `json:"CustomRoutes"`
+	FullTunnel    bool       `json:"FullTunnel"`
 }
 
 type indexTxtLine struct {
@@ -711,8 +718,8 @@ func (oAdmin *OvpnAdmin) renderClientConfig(username string) string {
 
 		conf := openvpnClientConfig{}
 		conf.Hosts = hosts
-		conf.CA = fRead(*easyrsaDirPath + "/pki/ca.crt")
-		conf.TLS = fRead(*easyrsaDirPath + "/pki/ta.key")
+		conf.CA = certificatePEM(fRead(*easyrsaDirPath + "/pki/ca.crt"))
+		conf.TLS = certificatePEM(fRead(*easyrsaDirPath + "/pki/ta.key"))
 
 		if *storageBackend == "kubernetes.secrets" {
 			conf.Cert, conf.Key = app.easyrsaGetClientCert(username)
@@ -720,6 +727,8 @@ func (oAdmin *OvpnAdmin) renderClientConfig(username string) string {
 			conf.Cert = fRead(*easyrsaDirPath + "/pki/issued/" + username + ".crt")
 			conf.Key = fRead(*easyrsaDirPath + "/pki/private/" + username + ".key")
 		}
+		conf.Cert = certificatePEM(conf.Cert)
+		conf.Key = certificatePEM(conf.Key)
 
 		conf.PasswdAuth = *authByPassword
 
@@ -773,9 +782,11 @@ func (oAdmin *OvpnAdmin) parseCcd(username string) Ccd {
 		str := strings.Fields(v)
 		if len(str) > 0 {
 			switch {
-			case strings.HasPrefix(str[0], "ifconfig-push"):
+			case strings.HasPrefix(str[0], "ifconfig-push") && len(str) >= 2:
 				ccd.ClientAddress = str[1]
-			case strings.HasPrefix(str[0], "push"):
+			case strings.HasPrefix(str[0], "push") && len(str) >= 2 && strings.Trim(str[1], "\"") == "redirect-gateway":
+				ccd.FullTunnel = true
+			case strings.HasPrefix(str[0], "push") && len(str) >= 4 && strings.Trim(str[1], "\"") == "route":
 				ccd.CustomRoutes = append(ccd.CustomRoutes, ccdRoute{Address: strings.Trim(str[2], "\""), Mask: strings.Trim(str[3], "\""), Description: strings.Trim(strings.Join(str[4:], ""), "#")})
 			}
 		}
@@ -991,6 +1002,12 @@ func (oAdmin *OvpnAdmin) usersList() []OpenvpnClient {
 					totalActiveConnections += 1
 				}
 				connectedUniqUsers += 1
+
+				for _, c := range oAdmin.activeClients {
+					if c.CommonName == line.Identity {
+						ovpnClient.ConnectedAddrs = append(ovpnClient.ConnectedAddrs, connectedAddr{VirtualAddress: c.VirtualAddress, RealAddress: c.RealAddress})
+					}
+				}
 			}
 
 			users = append(users, ovpnClient)

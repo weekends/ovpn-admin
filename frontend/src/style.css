@@ -70,3 +70,78 @@ body {
 .ccd-routes {
 
 }
+
+/* ---- theme toggle (light/dark) ---- */
+:root {
+  --bg: #ffffff;
+  --text: #212529;
+  --border: #dee2e6;
+  --surface: #f8f9fa;
+  --input-bg: #ffffff;
+  --input-text: #212529;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1d21;
+  --text: #e8e6e3;
+  --border: #3a3f44;
+  --surface: #23272b;
+  --input-bg: #2b3035;
+  --input-text: #e8e6e3;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color .2s ease, color .2s ease;
+}
+
+[data-theme="dark"] .vgt-wrap,
+[data-theme="dark"] .vgt-table,
+[data-theme="dark"] .vgt-table thead th,
+[data-theme="dark"] .vgt-table td {
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .vgt-wrap__footer,
+[data-theme="dark"] .vgt-global-search {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .modal-content {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="password"] {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .table-bordered td,
+[data-theme="dark"] .table-bordered th {
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .connected-user {
+  background-color: rgba(84, 184, 94, 0.25) !important;
+}
+
+[data-theme="dark"] .revoked-user {
+  background-color: rgba(120, 110, 110, 0.35) !important;
+}
+
+[data-theme="dark"] .expired-user {
+  background-color: rgba(201, 158, 46, 0.3) !important;
+}
+
+.theme-toggle-btn {
+  margin-right: 0.5rem;
+}

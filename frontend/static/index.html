@@ -14,6 +14,7 @@
     :row-style-class="rowStyleClassFn"
     :search-options="{ enabled: true}" >
     <div slot="table-actions">
+      <button type="button" class="btn btn-sm btn-outline-secondary el-square theme-toggle-btn" v-on:click.stop="toggleTheme()">{{ theme == 'dark' ? '☀ Light' : '🌙 Dark' }}</button>
       <button type="button" class="btn btn-sm btn-success el-square" v-show="serverRole == 'master'" v-on:click.stop="u.modalNewUserVisible=true">Add user</button>
       <b-badget class="btn btn-sm btn-info el-square" v-if="serverRole == 'slave'">Slave - last sync: {{ lastSync }}</b-badget>
       <button type="button" class="btn btn-sm btn-secondary el-square" v-on:click.stop="filters.hideRevoked=!filters.hideRevoked;this.$cookies.set('hideRevoked',!(this.$cookies.get('hideRevoked') == 'true'), -1);">{{ revokeFilterText }}</button>
@@ -24,6 +25,14 @@
       <button type="button" class="btn btn-sm btn-success el-square" v-if="serverRole == 'master'" v-on:click.stop="u.modalNewUserVisible=true">Add user</button>
     </div>
     <template slot="table-row" slot-scope="props">
+      <span v-if="props.column.field == 'Connections'">
+        <div v-if="props.row.ConnectedAddrs && props.row.ConnectedAddrs.length">
+          <div v-for="(addr, idx) in props.row.ConnectedAddrs" :key="idx">
+            {{ idx + 1 }}. {{ addr.VirtualAddress }} <span v-if="addr.RealAddress">({{ addr.RealAddress }})</span>
+          </div>
+        </div>
+        <div v-else>{{ props.row.Connections }}</div>
+      </span>
       <span v-if="props.column.field == 'actions'">
         <button
           class="btn btn-sm el-square modal-el-margin"
@@ -38,6 +47,9 @@
           v-if="action.showWhenStatus == props.row.AccountStatus && action.showForServerRole.includes(serverRole) && action.showForModule.some(p=> modulesEnabled.includes(p))">
           {{ action.label }}
         </button>
+      </span>
+      <span v-if="props.column.field != 'Connections' && props.column.field != 'actions'">
+        {{ props.formattedRow[props.column.field] }}
       </span>
     </template>
   </vue-good-table>
@@ -124,6 +136,13 @@
               <button id="static-address-clear" class="btn btn-warning" type="button" v-on:click="u.ccd.ClientAddress = 'dynamic'" v-if="serverRole == 'master'" v-bind:disabled="customAddressDynamic">Clear</button>
             </div>
           </div>
+          <div class="input-group mt-2">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="full-tunnel" v-model="u.ccd.FullTunnel" v-if="serverRole == 'master'">
+              <label class="form-check-label" for="full-tunnel">Full tunnel (push "redirect-gateway def1" — route ALL client traffic through VPN)</label>
+              <span v-if="serverRole == 'slave'">{{ u.ccd.FullTunnel ? 'Full tunnel: yes' : 'Full tunnel: no' }}</span>
+            </div>
+          </div>
         </div>
         <div class="modal-body">
           <div class="d-flex ">
@@ -179,7 +198,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-success el-square modal-el-margin" v-if="serverRole == 'master'" v-on:click.stop="ccdApply()">Save</button>
-            <button type="button" class="btn btn-primary el-square modal-el-margin" v-on:click.stop="u.ccd={Name:'',ClientAddress:'',CustomRoutes:[]};u.ccdApplyStatusMessage='';u.ccdApplyStatus='';u.modalShowCcdVisible=false">Close</button>
+            <button type="button" class="btn btn-primary el-square modal-el-margin" v-on:click.stop="u.ccd={Name:'',ClientAddress:'',CustomRoutes:[],FullTunnel:false};u.ccdApplyStatusMessage='';u.ccdApplyStatus='';u.modalShowCcdVisible=false">Close</button>
         </div>
       </div>
     </div>

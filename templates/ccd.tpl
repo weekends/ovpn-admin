@@ -4,3 +4,6 @@ ifconfig-push {{ .ClientAddress }} 255.255.255.0
 {{- range $route := .CustomRoutes }}
 push "route {{ $route.Address }} {{ $route.Mask }}" # {{ $route.Description }}
 {{- end }}
+{{- if .FullTunnel }}
+push "redirect-gateway def1"
+{{- end }}

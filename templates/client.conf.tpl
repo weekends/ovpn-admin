@@ -6,7 +6,9 @@ verb 4
 client
 nobind
 dev tun
-cipher AES-128-CBC
+data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305
+data-ciphers-fallback AES-128-CBC
+auth SHA256
 key-direction 1
 #redirect-gateway def1
 tls-client

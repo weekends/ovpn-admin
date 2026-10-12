@@ -7,3 +7,6 @@ push "route {{ $route.Address }} {{ $route.Mask }}" # {{ $route.Description }}
 {{- if .FullTunnel }}
 push "redirect-gateway def1"
 {{- end }}
+{{- if .DevName }}
+# devname: {{ .DevName }}
+{{- end }}

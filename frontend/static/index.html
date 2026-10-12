@@ -147,6 +147,12 @@
               <span v-if="serverRole == 'slave'">{{ u.ccd.FullTunnel ? 'Full tunnel: yes' : 'Full tunnel: no' }}</span>
             </div>
           </div>
+          <div class="input-group mt-2">
+            <h5 class="static-address-label ">Interface name:</h5>
+            <input id="dev-name" type="text" class="form-control" v-model="u.ccd.DevName" placeholder="default (tun)" maxlength="15" v-if="serverRole == 'master'">
+            <span v-if="serverRole == 'slave'">{{ u.ccd.DevName || 'default (tun)' }}</span>
+          </div>
+          <small class="text-muted">Sets `dev &lt;name&gt;` + `dev-type tun` in this user's generated .ovpn, instead of the default `dev tun` (auto-numbered tunN). Letters/digits/_/- only, max 15 chars. Leave empty for default.</small>
         </div>
         <div class="modal-body">
           <div class="d-flex ">
@@ -202,7 +208,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-success el-square modal-el-margin" v-if="serverRole == 'master'" v-on:click.stop="ccdApply()">Save</button>
-            <button type="button" class="btn btn-primary el-square modal-el-margin" v-on:click.stop="u.ccd={Name:'',ClientAddress:'',CustomRoutes:[],FullTunnel:false};u.ccdApplyStatusMessage='';u.ccdApplyStatus='';u.modalShowCcdVisible=false">Close</button>
+            <button type="button" class="btn btn-primary el-square modal-el-margin" v-on:click.stop="u.ccd={Name:'',ClientAddress:'',CustomRoutes:[],FullTunnel:false,DevName:''};u.ccdApplyStatusMessage='';u.ccdApplyStatus='';u.modalShowCcdVisible=false">Close</button>
         </div>
       </div>
     </div>

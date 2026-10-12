@@ -207,7 +207,8 @@ new Vue({
         Name: '',
         ClientAddress: '',
         CustomRoutes: [],
-        FullTunnel: false
+        FullTunnel: false,
+        DevName: ''
       },
       newRoute: {},
       ccdApplyStatus: "",

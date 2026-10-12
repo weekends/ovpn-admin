@@ -218,6 +218,7 @@ type openvpnClientConfig struct {
 	Key        string
 	TLS        string
 	PasswdAuth bool
+	DevName    string
 }
 
 type OpenvpnClient struct {
@@ -248,7 +249,14 @@ type Ccd struct {
 	ClientAddress string     `json:"ClientAddress"`
 	CustomRoutes  []ccdRoute `json:"CustomRoutes"`
 	FullTunnel    bool       `json:"FullTunnel"`
+	DevName       string     `json:"DevName"`
 }
+
+// devNameRegexp matches our own "# devname: NAME" marker comment in a CCD file.
+// It's a plain OpenVPN comment line (server ignores it), used only to persist
+// the client's preferred tun/tap interface name alongside the rest of that
+// user's CCD settings.
+var devNameRegexp = regexp.MustCompile(`^#\s*devname:\s*(\S+)\s*$`)
 
 type indexTxtLine struct {
 	Flag              string
@@ -722,6 +730,9 @@ func (oAdmin *OvpnAdmin) renderClientConfig(username string) string {
 		conf.Hosts = hosts
 		conf.CA = certificatePEM(fRead(*easyrsaDirPath + "/pki/ca.crt"))
 		conf.TLS = certificatePEM(fRead(*easyrsaDirPath + "/pki/ta.key"))
+		if *ccdEnabled {
+			conf.DevName = oAdmin.parseCcd(username).DevName
+		}
 
 		if *storageBackend == "kubernetes.secrets" {
 			conf.Cert, conf.Key = app.easyrsaGetClientCert(username)
@@ -781,6 +792,10 @@ func (oAdmin *OvpnAdmin) parseCcd(username string) Ccd {
 	}
 
 	for _, v := range txtLinesArray {
+		if m := devNameRegexp.FindStringSubmatch(strings.TrimSpace(v)); m != nil {
+			ccd.DevName = m[1]
+			continue
+		}
 		str := strings.Fields(v)
 		if len(str) > 0 {
 			switch {
@@ -868,8 +883,16 @@ func validateCcd(ccd Ccd) (bool, string) {
 		}
 	}
 
+	if ccd.DevName != "" && !devNameValidRegexp.MatchString(ccd.DevName) {
+		ccdErr = fmt.Sprintf("DevName %q must be alphanumeric/underscore/hyphen only, max 15 chars (Linux ifname limit)", ccd.DevName)
+		log.Debugf("modify ccd for user %s: %s", ccd.User, ccdErr)
+		return false, ccdErr
+	}
+
 	return true, ccdErr
 }
+
+var devNameValidRegexp = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,15}$`)
 
 func (oAdmin *OvpnAdmin) getCcd(username string) Ccd {
 	ccd := Ccd{}

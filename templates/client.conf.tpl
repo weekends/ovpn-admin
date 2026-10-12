@@ -5,7 +5,12 @@ remote {{ $server.Host }} {{ $server.Port }} {{ $server.Protocol }}
 verb 4
 client
 nobind
+{{- if .DevName }}
+dev {{ .DevName }}
+dev-type tun
+{{- else }}
 dev tun
+{{- end }}
 data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305
 data-ciphers-fallback AES-128-CBC
 auth SHA256

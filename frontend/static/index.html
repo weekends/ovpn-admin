@@ -7,6 +7,9 @@
 <body>
 <script src="dist/style.min.js"></script>
 <div id="app">
+  <div class="traffic-summary" v-if="totalLiveTraffic.rx > 0 || totalLiveTraffic.tx > 0">
+    Total live traffic: ↓ {{ formatBytes(totalLiveTraffic.rx) }} / ↑ {{ formatBytes(totalLiveTraffic.tx) }}
+  </div>
   <vue-good-table
     :columns="columns"
     :rows="filteredRows"
@@ -29,6 +32,7 @@
         <div v-if="props.row.ConnectedAddrs && props.row.ConnectedAddrs.length">
           <div v-for="(addr, idx) in props.row.ConnectedAddrs" :key="idx">
             {{ idx + 1 }}. {{ addr.VirtualAddress }} <span v-if="addr.RealAddress">({{ addr.RealAddress }})</span>
+            <small class="text-muted">— ↓ {{ formatBytes(addr.BytesReceived) }} / ↑ {{ formatBytes(addr.BytesSent) }}</small>
           </div>
         </div>
         <div v-else>{{ props.row.Connections }}</div>

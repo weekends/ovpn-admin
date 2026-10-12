@@ -307,6 +307,16 @@ new Vue({
     })
   },
   computed: {
+    totalLiveTraffic: function () {
+      var rx = 0, tx = 0;
+      (this.rows || []).forEach(function (row) {
+        (row.ConnectedAddrs || []).forEach(function (addr) {
+          rx += addr.BytesReceived || 0;
+          tx += addr.BytesSent || 0;
+        });
+      });
+      return { rx: rx, tx: tx };
+    },
     customAddressDynamic: function () {
       return this.u.ccd.ClientAddress == "dynamic"
     },
@@ -355,6 +365,17 @@ new Vue({
 
   },
   methods: {
+    formatBytes: function (bytes) {
+      bytes = bytes || 0;
+      if (bytes < 1024) return bytes + ' B';
+      var units = ['KB', 'MB', 'GB', 'TB'];
+      var i = -1;
+      do {
+        bytes /= 1024;
+        i++;
+      } while (bytes >= 1024 && i < units.length - 1);
+      return bytes.toFixed(1) + ' ' + units[i];
+    },
     toggleTheme: function() {
       this.theme = this.theme == 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', this.theme);

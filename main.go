@@ -233,6 +233,8 @@ type OpenvpnClient struct {
 type connectedAddr struct {
 	VirtualAddress string `json:"VirtualAddress"`
 	RealAddress    string `json:"RealAddress"`
+	BytesReceived  int64  `json:"BytesReceived"`
+	BytesSent      int64  `json:"BytesSent"`
 }
 
 type ccdRoute struct {
@@ -1005,7 +1007,9 @@ func (oAdmin *OvpnAdmin) usersList() []OpenvpnClient {
 
 				for _, c := range oAdmin.activeClients {
 					if c.CommonName == line.Identity {
-						ovpnClient.ConnectedAddrs = append(ovpnClient.ConnectedAddrs, connectedAddr{VirtualAddress: c.VirtualAddress, RealAddress: c.RealAddress})
+						bytesReceived, _ := strconv.ParseInt(c.BytesReceived, 10, 64)
+						bytesSent, _ := strconv.ParseInt(c.BytesSent, 10, 64)
+						ovpnClient.ConnectedAddrs = append(ovpnClient.ConnectedAddrs, connectedAddr{VirtualAddress: c.VirtualAddress, RealAddress: c.RealAddress, BytesReceived: bytesReceived, BytesSent: bytesSent})
 					}
 				}
 			}

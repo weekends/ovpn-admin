@@ -170,3 +170,12 @@ body {
   color: var(--text) !important;
   border-color: var(--border) !important;
 }
+
+.traffic-summary {
+  padding: 0.5em 1em;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .traffic-summary {
+  color: var(--text);
+}

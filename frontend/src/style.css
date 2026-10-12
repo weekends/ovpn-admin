@@ -96,18 +96,37 @@ body {
   transition: background-color .2s ease, color .2s ease;
 }
 
+/* vue-good-table uses `background: linear-gradient(...)` (not background-color)
+   on thead/th.line-numbers/footer/search — must override the full `background`
+   shorthand, not just background-color, or the light gradient stays visible. */
 [data-theme="dark"] .vgt-wrap,
 [data-theme="dark"] .vgt-table,
-[data-theme="dark"] .vgt-table thead th,
+[data-theme="dark"] .vgt-table tr {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+/* td must stay transparent so row-status classes (connected/revoked/expired,
+   set on <tr>) show through instead of being hidden behind an opaque td bg */
 [data-theme="dark"] .vgt-table td {
-  background-color: var(--bg) !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .vgt-table thead th,
+[data-theme="dark"] .vgt-table th.line-numbers,
+[data-theme="dark"] .vgt-table th.vgt-checkbox-col,
+[data-theme="dark"] .vgt-table th.vgt-row-header {
+  background: var(--surface) !important;
   color: var(--text) !important;
   border-color: var(--border) !important;
 }
 
 [data-theme="dark"] .vgt-wrap__footer,
 [data-theme="dark"] .vgt-global-search {
-  background-color: var(--surface) !important;
+  background: var(--surface) !important;
   color: var(--text) !important;
   border-color: var(--border) !important;
 }
@@ -130,18 +149,24 @@ body {
   border-color: var(--border) !important;
 }
 
-[data-theme="dark"] .connected-user {
-  background-color: rgba(84, 184, 94, 0.25) !important;
+[data-theme="dark"] .vgt-table tr.connected-user {
+  background: rgba(84, 184, 94, 0.25) !important;
 }
 
-[data-theme="dark"] .revoked-user {
-  background-color: rgba(120, 110, 110, 0.35) !important;
+[data-theme="dark"] .vgt-table tr.revoked-user {
+  background: rgba(120, 110, 110, 0.35) !important;
 }
 
-[data-theme="dark"] .expired-user {
-  background-color: rgba(201, 158, 46, 0.3) !important;
+[data-theme="dark"] .vgt-table tr.expired-user {
+  background: rgba(201, 158, 46, 0.3) !important;
 }
 
 .theme-toggle-btn {
   margin-right: 0.5rem;
+}
+
+[data-theme="dark"] .theme-toggle-btn {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
 }

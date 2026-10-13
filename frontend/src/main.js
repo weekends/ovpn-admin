@@ -229,6 +229,16 @@ new Vue({
       this.theme = savedTheme;
     } catch (e) {}
     document.documentElement.setAttribute('data-theme', this.theme);
+
+    var _this = this;
+    this.autoRefreshTimer = setInterval(function () {
+      _this.getUserData();
+    }, 30000);
+  },
+  beforeDestroy: function () {
+    if (this.autoRefreshTimer) {
+      clearInterval(this.autoRefreshTimer);
+    }
   },
   created() {
     var _this = this;

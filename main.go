@@ -652,7 +652,7 @@ func (oAdmin *OvpnAdmin) setState() {
 
 func (oAdmin *OvpnAdmin) updateState() {
 	for {
-		time.Sleep(time.Duration(28) * time.Second)
+		time.Sleep(time.Duration(30) * time.Second)
 		ovpnClientBytesSent.Reset()
 		ovpnClientBytesReceived.Reset()
 		ovpnClientConnectionFrom.Reset()

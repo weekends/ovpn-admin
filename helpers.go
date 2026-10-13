@@ -77,7 +77,11 @@ func certificatePEM(raw string) string {
 	if match == "" {
 		return raw
 	}
-	return match
+	// the regex stops exactly at the closing "-----" of the END line, dropping
+	// the trailing newline the original file had — restore it, since
+	// client.conf.tpl relies on this value supplying its own trailing newline
+	// (it uses "{{ .Cert -}}" etc., which trims the template's own whitespace)
+	return match + "\n"
 }
 
 func fCreate(path string) error {
